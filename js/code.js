@@ -1,3 +1,5 @@
+// 准备好的随机代码
+
 const CODE_C = `#include <stdio.h>
 
 int main() {
@@ -280,6 +282,9 @@ end
 
 endmodule`
 
+
+// key -> object
+// not key -> string
 const CODE_SET = {
     "c": CODE_C,
     "cpp": CODE_CPP,
@@ -309,5 +314,5 @@ const CODE_SET = {
     "sql": CODE_SQL,
     "verilog": CODE_VERILOG
 };
-
+// 获取key数组，否则没有获得count的api
 const CODE_COUNT = Object.keys(CODE_SET).length;

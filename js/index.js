@@ -36,8 +36,8 @@ copier.on('click', (e) => {
 });
 
 // Prism core converter.
-var input = $('#source');
-var output = $('pre>code');
+var input = $('#source');  // <textarea id='source'>
+var output = $('pre>code');  // 选择pre标签元素的直系code标签元素
 var isEmpty = true;    // used in help
 
 // Override tab key behavior
@@ -57,24 +57,39 @@ input.on('keydown', function (e) {
 });
 
 
+// type传入此时进行的操作，包括clear, make
 async function makePaste(type) {
     // console.log(input.val());
+    // console.log(output.html());
+    // .html()获取该元素的html代码内容，.html('')将该元素的代码内容清空
     output.html('');
+    // console.log(output.html());
+
+    // .trim()用于去除字符串两端的空白字符
     output.text(input.val().trim());
-    await Prism.highlightAll();
+    // console.log(output.html());
+
+    
+    await Prism.highlightAll(); // 等待渲染结束，再执行下面的代码
+
+
     if (output.html() === '') {
         isEmpty = true;
+        // 如果点的是清空
         if (type === 'clear') {
             alertify.success("Code paste already cleared 🥹");
+            // 如果在没有输入内容的情况下执行高亮
         } else if (type == 'make') {
             alertify.warning("The ingredient, please (> <)");
         }
     } else {
         isEmpty = false;
         var str = output.html().toString();
+        // 更改output的html代码内容
         str = str.replaceAll('\n', '<br/>');
         str = normalizeString(str);
         output.html(str);
+
         if (type == 'make') {
             alertify.success("Code paste ready to go!😋");
         } else if (type == 'random') {
@@ -100,7 +115,7 @@ async function copyPaste() {
         alertify.warning("Make your code paste first (> <)");
         return;
     }
-
+    // 复制具有html格式的代码，同时word等软件能够识别这些内容，以实现功能
     if (copyHTMLElement(output.get(0))) {
         alertify.success("Code paste copied to clipboard!🤩");
     } else {
@@ -142,6 +157,7 @@ $('div.panel').each(function () {
 
 // language
 var currentLanguage = "C";
+// 右上角标注type（鼠标悬浮触发）
 function updateLanguageTip() {
     var tip = $('div.toolbar-item span');
     if (tip.length) {
@@ -157,6 +173,7 @@ $('#lang').change(function () {
 });
 
 function updateActiveLanguage(lang, text) {
+    // 去除原样式，添加新样式
     code.removeClass().addClass('language-' + lang);
     currentLanguage = text;
 }
@@ -189,10 +206,17 @@ supporter.on('click', (e) => {
     alertify.alert("Buy me a coffee 🍵", `<div class="coffee"><img src="/res/img/payment.jpg" alt="WeChat Pay" title="Scan to support me"><p>We appreciate your sponsorship!🌹</p></div>`);
 });
 
-// Random code.
-var random = $('#random');
+// 获取组件，绑定点击事件
+var random = $('#random');  // 获取id为random的组件（这里是div)
+
 random.on('click', (e) => {
+    // 点击时出现动画，可见.addClass是一次性的
     random.addClass('animate__animated animate__rubber');
+
+    /* 
+    1. 选择随机语言，并选中
+    2. 填入对应语言代码，并自动执行高亮显示
+     */
     makeRandomPaste();
 });
 
@@ -212,7 +236,10 @@ function generateRandomLanguage() {
 function getRandomLanguage() {
     const optionSelected = $('#lang').find("option:selected");
     const current = optionSelected.val();
+
     var lang = generateRandomLanguage();
+
+    // 得到一个异于当前的language，否则重复调用
     while (lang == current) {
         lang = generateRandomLanguage();
     }
@@ -221,16 +248,22 @@ function getRandomLanguage() {
 
 function makeRandomPaste() {
     // get random code
+    // 得到随机type
     const lang = getRandomLanguage();
+    // 根据type得到准备好的代码，填入输入框（.val更改textarea的文本）
     input.val(CODE_SET[lang]);
+    // 找到ID为 'source' 的元素，然后在该元素上触发一个 'input' 事件(模拟用户输入)
     $('#source').get(0).dispatchEvent(new Event('input'));
 
     // update language
+    // 对应type设置为选中状态 prop
     $('option[value="' + lang + '"]').prop("selected", true);
     const optionSelected = $('#lang').find("option:selected");
+
+    // 对语言添加相应的样式
     updateActiveLanguage(optionSelected.val(), optionSelected.text());
 
-    // auto trigger make
+    // auto trigger make 即直接显示高亮之后的代码，否则需要自己点make
     makePaste('random');
 }
 
